@@ -629,10 +629,11 @@ class TTSProviderBase(ABC):
         """閲嶇疆娴佸紡澶勭悊鐘舵€侊紝鐢ㄤ簬浼氳瘽寮€濮嬫椂娓呯悊娈嬬暀鐘舵€?""
         self._pending_prefix = ""
 
-    def synthesize(self, text: str):
+
+    async def synthesize(self, text: str):
         """一站式合成：文本 → 音频字节（供 REST API 使用）"""
         output_file = self.generate_filename()
-        asyncio.run(self.text_to_speak(text, output_file))
+        await self.text_to_speak(text, output_file)
         with open(output_file, "rb") as f:
             data = f.read()
         if self.delete_audio_file and os.path.exists(output_file):

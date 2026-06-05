@@ -1,4 +1,5 @@
 ﻿import json
+import threading
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse, Response
 from app.schemas.ask import AskRequest, AskMode
@@ -13,48 +14,51 @@ TAG = __name__
 
 _pipeline: VoiceAssistantPipeline = None
 _config: dict = None
+_lock = threading.Lock()
 
 
 def get_pipeline() -> VoiceAssistantPipeline:
     global _pipeline, _config
     if _pipeline is None:
-        _config = load_config()
-        modules = initialize_modules(
-            logger,
-            _config,
-            init_vad=False,
-            init_asr=("ASR" in _config.get("selected_module", {})),
-            init_llm=("LLM" in _config.get("selected_module", {})),
-            init_tts=("TTS" in _config.get("selected_module", {})),
-            init_memory=("Memory" in _config.get("selected_module", {})),
-            init_intent=("Intent" in _config.get("selected_module", {})),
-        )
-        llm_instance = modules.get("llm")
-        asr_instance = modules.get("asr")
-        tts_instance = modules.get("tts")
-        memory_instance = modules.get("memory")
-        intent_instance = modules.get("intent")
-        intent_type = "nointent"
-        if modules.get("intent"):
-            sel = _config.get("selected_module", {}).get("Intent", "nointent")
-            intent_type = _config.get("Intent", {}).get(sel, {}).get("type", sel)
+        with _lock:
+            if _pipeline is None:
+                _config = load_config()
+                modules = initialize_modules(
+                    logger,
+                    _config,
+                    init_vad=False,
+                    init_asr=("ASR" in _config.get("selected_module", {})),
+                    init_llm=("LLM" in _config.get("selected_module", {})),
+                    init_tts=("TTS" in _config.get("selected_module", {})),
+                    init_memory=("Memory" in _config.get("selected_module", {})),
+                    init_intent=("Intent" in _config.get("selected_module", {})),
+                )
+                llm_instance = modules.get("llm")
+                asr_instance = modules.get("asr")
+                tts_instance = modules.get("tts")
+                memory_instance = modules.get("memory")
+                intent_instance = modules.get("intent")
+                intent_type = "nointent"
+                if modules.get("intent"):
+                    sel = _config.get("selected_module", {}).get("Intent", "nointent")
+                    intent_type = _config.get("Intent", {}).get(sel, {}).get("type", sel)
 
-        _pipeline = VoiceAssistantPipeline(
-            llm=llm_instance,
-            tts=tts_instance,
-            asr=asr_instance,
-            memory=memory_instance,
-            intent=intent_instance,
-            intent_type=intent_type,
-            config=_config,
-        )
-        logger.bind(tag=TAG).info("Pipeline initialized")
+                _pipeline = VoiceAssistantPipeline(
+                    llm=llm_instance,
+                    tts=tts_instance,
+                    asr=asr_instance,
+                    memory=memory_instance,
+                    intent=intent_instance,
+                    intent_type=intent_type,
+                    config=_config,
+                )
+                logger.bind(tag=TAG).info("Pipeline initialized")
     return _pipeline
 
 
 @router.post("/ask")
 async def ask(request: AskRequest):
-    """文本问答 — JSON 请求，SSE 流式响应"""
+    """文本问答 - JSON 请求体，SSE 流式响应"""
     if request.mode != AskMode.text:
         raise HTTPException(400, "JSON 请求 mode 必须为 text")
 
@@ -80,15 +84,15 @@ async def ask_audio(
     file: UploadFile = File(...),
     session_id: str = Form(None),
 ):
-    """语音问答 — multipart/form-data，返回 audio/wav"""
+    """语音问答 - multipart/form-data，返回 audio/wav"""
     pipeline = get_pipeline()
     audio_bytes = await file.read()
 
-    tts_chunks = []
+    audio_data = b""
     async for chunk in pipeline.ask_audio(audio_bytes, session_id):
-        tts_chunks.append(chunk)
+        audio_data += chunk
 
-    if not tts_chunks:
+    if not audio_data:
         raise HTTPException(400, "未能生成语音回复")
 
-    return Response(content=b"".join(tts_chunks), media_type="audio/wav")
+    return Response(content=audio_data, media_type="audio/wav")

@@ -1,13 +1,11 @@
 ﻿import json
 import uuid
-import asyncio
 from typing import AsyncGenerator, Dict, Any, Optional
 from app.config.logger import setup_logging
 from app.core.utils.dialogue import Message, Dialogue
 from app.core.providers.tools.unified_tool_handler import UnifiedToolHandler
 from app.core.utils.prompt_manager import PromptManager
 from plugins_func.loadplugins import auto_import_modules
-from plugins_func.register import Action, ActionResponse
 
 auto_import_modules("plugins_func.functions")
 
@@ -151,7 +149,10 @@ class VoiceAssistantPipeline:
         if not self.asr:
             raise RuntimeError("ASR module not configured")
 
-        text = await self.asr.transcribe(audio_bytes)
+        # ASR: speech_to_text_wrapper expects List[bytes] + session_id
+        text, _ = await self.asr.speech_to_text_wrapper(
+            [audio_bytes], session_id, audio_format="pcm"
+        )
         if not text:
             return
 
@@ -163,8 +164,8 @@ class VoiceAssistantPipeline:
                 break
 
         if answer and self.tts:
-            for audio_chunk in self.tts.synthesize(answer):
-                yield audio_chunk
+            audio_data = await self.tts.synthesize(answer)
+            yield audio_data
 
     async def _execute_tools(self, pending_tool_calls: dict) -> list:
         results = []
