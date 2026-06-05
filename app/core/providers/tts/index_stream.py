@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 import queue
 import aiohttp
@@ -28,12 +28,12 @@ class TTSProvider(TTSProviderBase):
         self.audio_format = "pcm"
         self.before_stop_play_files = []
 
-        # 创建Opus编码�?需注意接口返回的采样率�?4000
+        # 创建Opus编码?需注意接口返回的采样率?4000
 #         self.opus_encoder = opus_encoder_utils.OpusEncoderUtils(
             sample_rate=24000, channels=1, frame_size_ms=60
         )
 
-        # PCM缓冲�?
+        # PCM缓冲?
         self.pcm_buffer = bytearray()
 
     def tts_text_priority_thread(self):
@@ -42,7 +42,7 @@ class TTSProvider(TTSProviderBase):
             try:
                 message = self.tts_text_queue.get(timeout=1)
                 if message.sentence_type == SentenceType.FIRST:
-                    # 初始化参�?
+                    # 初始化参?
                     self.tts_stop_request = False
                     self.processed_chars = 0
                     self.tts_text_buff = []
@@ -58,11 +58,11 @@ class TTSProvider(TTSProviderBase):
                         f"添加音频文件到待播放列表: {message.content_file}"
                     )
                     if message.content_file and os.path.exists(message.content_file):
-                        # 先处理文件音频数�?
+                        # 先处理文件音频数?
                         self._process_audio_file_stream(message.content_file, callback=lambda audio_data: self.handle_audio_file(audio_data, message.content_detail))
 
                 if message.sentence_type == SentenceType.LAST:
-                    # 处理剩余的文�?
+                    # 处理剩余的文?
                     self._process_remaining_text_stream(True)
 
             except queue.Empty:
@@ -75,7 +75,7 @@ class TTSProvider(TTSProviderBase):
     def _process_remaining_text_stream(self, is_last=False):
         """处理剩余的文本并生成语音
         Returns:
-            bool: 是否成功处理了文�?
+            bool: 是否成功处理了文?
         """
         full_text = "".join(self.tts_text_buff)
         remaining_text = full_text[self.processed_chars :]
@@ -100,13 +100,13 @@ class TTSProvider(TTSProviderBase):
                 asyncio.run(self.text_to_speak(text, is_last))
             except Exception as e:
                 logger.bind(tag=TAG).warning(
-                    f"语音生成失败{5 - max_repeat_time + 1}�? {original_text}，错�? {e}"
+                    f"语音生成失败{5 - max_repeat_time + 1}? {original_text}，错? {e}"
                 )
                 max_repeat_time -= 1
 
             if max_repeat_time > 0:
                 logger.bind(tag=TAG).info(
-                    f"语音生成成功: {original_text}，重试{5 - max_repeat_time}�?
+                    f"语音生成成功: {original_text}，重试{5 - max_repeat_time}?
                 )
             else:
                 logger.bind(tag=TAG).error(
@@ -118,7 +118,7 @@ class TTSProvider(TTSProviderBase):
             return None
 
     async def text_to_speak(self, text, is_last):
-        """流式处理TTS音频，每句只推送一次音频列�?""
+        """流式处理TTS音频，每句只推送一次音频列?""
         payload = {"text": text, "character": self.voice}
 
         frame_bytes = int(
@@ -142,7 +142,7 @@ class TTSProvider(TTSProviderBase):
                     self.pcm_buffer.clear()
                     self.tts_audio_queue.put((SentenceType.FIRST, [], text))
 
-                    # 处理音频流数�?
+                    # 处理音频流数?
                     async for chunk in resp.content.iter_any():
                         data = chunk[0] if isinstance(chunk, (list, tuple)) else chunk
                         if not data:
@@ -180,14 +180,14 @@ class TTSProvider(TTSProviderBase):
     def audio_to_pcm_data_stream(
         self, audio_file_path, callback=None
     ):
-        """音频文件转换为PCM编码，使�?4kHz采样�?""
+        """音频文件转换为PCM编码，使?4kHz采样?""
 #         from core.utils.util import audio_to_data_stream
 #         return audio_to_data_stream(audio_file_path, is_opus=False, callback=callback, sample_rate=24000, opus_encoder=None)  # simplified for REST API
 
     def audio_to_opus_data_stream(
         self, audio_file_path, callback=None
     ):
-        """音频文件转换为Opus编码，使�?4kHz采样率和自己的编码器"""
+        """音频文件转换为Opus编码，使?4kHz采样率和自己的编码器"""
 #         from core.utils.util import audio_to_data_stream
 #         return audio_to_data_stream(audio_file_path, is_opus=True, callback=callback, sample_rate=24000, opus_encoder=self.opus_encoder)  # simplified for REST API
 
@@ -198,7 +198,7 @@ class TTSProvider(TTSProviderBase):
             self.opus_encoder.close()
 
     def to_tts(self, text: str) -> list:
-        """非流式TTS处理，用于测试及保存音频文件的场�?
+        """非流式TTS处理，用于测试及保存音频文件的场?
         Args:
             text: 要转换的文本
         Returns:
@@ -219,7 +219,7 @@ class TTSProvider(TTSProviderBase):
                     )
                     return []
 
-                logger.info(f"TTS请求成功: {text}, 耗时: {time.time() - start_time}�?)
+                logger.info(f"TTS请求成功: {text}, 耗时: {time.time() - start_time}?)
 
                 # 使用opus编码器处理PCM数据
                 opus_datas = []
@@ -238,7 +238,7 @@ class TTSProvider(TTSProviderBase):
                 for i in range(0, len(pcm_data), frame_bytes):
                     frame = pcm_data[i : i + frame_bytes]
                     if len(frame) < frame_bytes:
-                        # 最后一帧可能不足，�?填充
+                        # 最后一帧可能不足，?填充
                         frame = frame + b"\x00" * (frame_bytes - len(frame))
 
                     self.opus_encoder.encode_pcm_to_opus_stream(

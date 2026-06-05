@@ -1,0 +1,136 @@
+﻿{
+  "info": {
+    "name": "XiaoZhi QA Service",
+    "description": "独立语音问答服务 API — 文本/语音问答",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "文本问答",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"你好，请介绍一下你自己\",\n    \"mode\": \"text\",\n    \"session_id\": null,\n    \"role_prompt\": null\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8010/api/v1/ask",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8010",
+          "path": ["api", "v1", "ask"]
+        },
+        "description": "发送文本问题，SSE 流式返回 LLM 回复"
+      },
+      "response": []
+    },
+    {
+      "name": "语音问答",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "question.wav",
+              "description": "音频文件 (WAV/MP3)"
+            },
+            {
+              "key": "session_id",
+              "value": "my-session",
+              "type": "text",
+              "description": "可选会话ID"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8010/api/v1/ask/audio",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8010",
+          "path": ["api", "v1", "ask", "audio"]
+        },
+        "description": "上传音频文件，返回 TTS 语音回复"
+      },
+      "response": []
+    },
+    {
+      "name": "多轮对话-第一轮",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"我叫小明，我喜欢吃火锅\",\n    \"mode\": \"text\",\n    \"session_id\": \"demo-session\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8010/api/v1/ask",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8010",
+          "path": ["api", "v1", "ask"]
+        },
+        "description": "第一轮对话，传入 session_id 建立上下文"
+      },
+      "response": []
+    },
+    {
+      "name": "多轮对话-第二轮",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"我叫什么名字？我喜欢吃什么？\",\n    \"mode\": \"text\",\n    \"session_id\": \"demo-session\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8010/api/v1/ask",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8010",
+          "path": ["api", "v1", "ask"]
+        },
+        "description": "使用相同 session_id，验证上下文记忆"
+      },
+      "response": []
+    },
+    {
+      "name": "工具调用-天气查询",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"今天北京天气怎么样？\",\n    \"mode\": \"text\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8010/api/v1/ask",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8010",
+          "path": ["api", "v1", "ask"]
+        },
+        "description": "触发 get_weather 工具调用（需配置天气API）"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8010"
+    }
+  ]
+}

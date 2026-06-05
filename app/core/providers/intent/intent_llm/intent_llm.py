@@ -1,4 +1,4 @@
-﻿from typing import List, Dict, TYPE_CHECKING
+from typing import List, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import TYPE_CHECKING, Any
@@ -24,18 +24,18 @@ class IntentProvider(IntentProviderBase):
         super().__init__(config)
         self.llm = None
         self.promot = ""
-        # 导入全局缓存管理�?
+        # 导入全局缓存管理?
         from core.utils.cache.manager import cache_manager, CacheType
 
         self.cache_manager = cache_manager
         self.CacheType = CacheType
-        self.history_count = 4  # 默认使用最�?条对话记�?
+        self.history_count = 4  # 默认使用最?条对话记?
 
     def get_intent_system_prompt(self, functions_list: str) -> str:
         """
         根据配置的意图选项和可用函数动态生成系统提示词
         Args:
-            functions: 可用的函数列表，JSON格式字符�?
+            functions: 可用的函数列表，JSON格式字符?
         Returns:
             格式化后的系统提示词
         """
@@ -48,7 +48,7 @@ class IntentProvider(IntentProviderBase):
             desc = func_info.get("description", "")
             params = func_info.get("parameters", {})
 
-            functions_desc += f"\n函数�? {name}\n"
+            functions_desc += f"\n函数? {name}\n"
             functions_desc += f"描述: {desc}\n"
 
             if params:
@@ -67,10 +67,10 @@ class IntentProvider(IntentProviderBase):
             "- 询问当前时间（如：现在几点、当前时间、查询时间等）\n"
             "- 询问今天日期（如：今天几号、今天星期几、今天是什么日期等）\n"
             "- 询问今天农历（如：今天农历几号、今天什么节气等）\n"
-            "- 询问所在城市（如：我现在在哪里、你知道我在哪个城市吗等�?
+            "- 询问所在城市（如：我现在在哪里、你知道我在哪个城市吗等?
             "系统会根据上下文信息直接构建回答。\n\n"
-            "- 如果用户使用疑问词（�?怎么'�?为什�?�?如何'）询问退出相关的问题（例�?怎么退出了�?），注意这不是让你退出，请返�?{'function_call': {'name': 'continue_chat'}\n"
-            "- 仅当用户明确使用'退出系�?�?结束对话'�?我不想和你说话了'等指令时，才触发 handle_exit_intent\n\n"
+            "- 如果用户使用疑问词（?怎么'?为什??如何'）询问退出相关的问题（例?怎么退出了?），注意这不是让你退出，请返?{'function_call': {'name': 'continue_chat'}\n"
+            "- 仅当用户明确使用'退出系??结束对话'?我不想和你说话了'等指令时，才触发 handle_exit_intent\n\n"
             f"{functions_desc}\n"
             "处理步骤:\n"
             "1. 分析用户输入，确定用户意图\n"
@@ -97,7 +97,7 @@ class IntentProvider(IntentProviderBase):
             '返回: {"function_call": {"name": "self_screen_get_brightness"}}\n'
             "```\n"
             "```\n"
-            "用户: 设置屏幕亮度�?0%\n"
+            "用户: 设置屏幕亮度?0%\n"
             '返回: {"function_call": {"name": "self_screen_set_brightness", "arguments": {"brightness": 50}}}\n'
             "```\n"
             "```\n"
@@ -115,7 +115,7 @@ class IntentProvider(IntentProviderBase):
             "4. 确保返回的JSON格式正确，包含所有必要的字段\n"
             "5. result_for_context不需要任何参数，系统会自动从上下文获取信息\n"
             "特殊说明：\n"
-            "- 当用户单次输入包含多个指令时（如'打开灯并且调高音�?）\n"
+            "- 当用户单次输入包含多个指令时（如'打开灯并且调高音?）\n"
             "- 请返回多个function_call组成的JSON数组\n"
             "- 示例：{'function_calls': [{name:'light_on'}, {name:'volume_up'}]}\n\n"
             "【最终警告】绝对禁止输出任何自然语言、表情符号或解释文字！只能输出有效JSON格式！违反此规则将导致系统错误！"
@@ -126,7 +126,7 @@ class IntentProvider(IntentProviderBase):
         try:
             llm_result = self.llm.response_no_stream(
                 system_prompt=text,
-                user_prompt="请根据以上内容，像人类一样说话的口吻回复用户，要求简洁，请直接返回结果。用户现在说�?
+                user_prompt="请根据以上内容，像人类一样说话的口吻回复用户，要求简洁，请直接返回结果。用户现在说?
                 + original_text,
             )
             return llm_result
@@ -142,22 +142,22 @@ class IntentProvider(IntentProviderBase):
         if conn.func_handler is None:
             return '{"function_call": {"name": "continue_chat"}}'
 
-        # 记录整体开始时�?
+        # 记录整体开始时?
         total_start_time = time.time()
 
-        # 打印使用的模型信�?
+        # 打印使用的模型信?
         model_info = getattr(self.llm, "model_name", str(self.llm.__class__.__name__))
         logger.bind(tag=TAG).debug(f"使用意图识别模型: {model_info}")
 
-        # 计算缓存�?
+        # 计算缓存?
         cache_key = hashlib.md5((conn.device_id + text).encode()).hexdigest()
 
-        # 检查缓�?
+        # 检查缓?
         cached_intent = self.cache_manager.get(self.CacheType.INTENT, cache_key)
         if cached_intent is not None:
             cache_time = time.time() - total_start_time
             logger.bind(tag=TAG).debug(
-                f"使用缓存的意�? {cache_key} -> {cached_intent}, 耗时: {cache_time:.4f}�?
+                f"使用缓存的意? {cache_key} -> {cached_intent}, 耗时: {cache_time:.4f}?
             )
             return cached_intent
 
@@ -189,7 +189,7 @@ class IntentProvider(IntentProviderBase):
 
         logger.bind(tag=TAG).debug(f"User prompt: {prompt_music}")
 
-        # 构建用户对话历史的提�?
+        # 构建用户对话历史的提?
         msgStr = ""
 
         # 获取最近的对话历史
@@ -200,9 +200,9 @@ class IntentProvider(IntentProviderBase):
         msgStr += f"User: {text}\n"
         user_prompt = f"current dialogue:\n{msgStr}"
 
-        # 记录预处理完成时�?
+        # 记录预处理完成时?
         preprocess_time = time.time() - total_start_time
-        logger.bind(tag=TAG).debug(f"意图识别预处理耗时: {preprocess_time:.4f}�?)
+        logger.bind(tag=TAG).debug(f"意图识别预处理耗时: {preprocess_time:.4f}?)
 
         # 使用LLM进行意图识别
         llm_start_time = time.time()
@@ -219,29 +219,29 @@ class IntentProvider(IntentProviderBase):
         # 记录LLM调用完成时间
         llm_time = time.time() - llm_start_time
         logger.bind(tag=TAG).debug(
-            f"外挂的大模型意图识别完成, 模型: {model_info}, 调用耗时: {llm_time:.4f}�?
+            f"外挂的大模型意图识别完成, 模型: {model_info}, 调用耗时: {llm_time:.4f}?
         )
 
-        # 记录后处理开始时�?
+        # 记录后处理开始时?
         postprocess_start_time = time.time()
 
-        # 清理和解析响�?
+        # 清理和解析响?
         intent = intent.strip()
         # 尝试提取JSON部分
         match = re.search(r"\{.*\}", intent, re.DOTALL)
         if match:
             intent = match.group(0)
 
-        # 记录总处理时�?
+        # 记录总处理时?
         total_time = time.time() - total_start_time
         logger.bind(tag=TAG).debug(
-            f"【意图识别性能】模�? {model_info}, 总耗时: {total_time:.4f}�? LLM调用: {llm_time:.4f}�? 查询: '{text[:20]}...'"
+            f"【意图识别性能】模? {model_info}, 总耗时: {total_time:.4f}? LLM调用: {llm_time:.4f}? 查询: '{text[:20]}...'"
         )
 
         # 尝试解析为JSON
         try:
             intent_data = json.loads(intent)
-            # 如果包含function_call，则格式化为适合处理的格�?
+            # 如果包含function_call，则格式化为适合处理的格?
             if "function_call" in intent_data:
                 function_data = intent_data["function_call"]
                 function_name = function_data.get("name")
@@ -249,18 +249,18 @@ class IntentProvider(IntentProviderBase):
 
                 # 记录识别到的function call
                 logger.bind(tag=TAG).info(
-                    f"llm 识别到意�? {function_name}, 参数: {function_args}"
+                    f"llm 识别到意? {function_name}, 参数: {function_args}"
                 )
 
-                # 处理不同类型的意�?
+                # 处理不同类型的意?
                 if function_name == "result_for_context":
                     # 处理基础信息查询，直接从context构建结果
                     logger.bind(tag=TAG).info(
-                        "检测到result_for_context意图，将使用上下文信息直接回�?
+                        "检测到result_for_context意图，将使用上下文信息直接回?
                     )
 
                 elif function_name == "continue_chat":
-                    # 处理普通对�?
+                    # 处理普通对?
                     # 保留非工具相关的消息
                     clean_history = [
                         msg
@@ -273,16 +273,16 @@ class IntentProvider(IntentProviderBase):
                     # 处理函数调用
                     logger.bind(tag=TAG).info(f"检测到函数调用意图: {function_name}")
 
-            # 统一缓存处理和返�?
+            # 统一缓存处理和返?
             self.cache_manager.set(self.CacheType.INTENT, cache_key, intent)
             postprocess_time = time.time() - postprocess_start_time
-            logger.bind(tag=TAG).debug(f"意图后处理耗时: {postprocess_time:.4f}�?)
+            logger.bind(tag=TAG).debug(f"意图后处理耗时: {postprocess_time:.4f}?)
             return intent
         except json.JSONDecodeError:
-            # 后处理时�?
+            # 后处理时?
             postprocess_time = time.time() - postprocess_start_time
             logger.bind(tag=TAG).error(
-                f"无法解析意图JSON: {intent}, 后处理耗时: {postprocess_time:.4f}�?
+                f"无法解析意图JSON: {intent}, 后处理耗时: {postprocess_time:.4f}?
             )
-            # 如果解析失败，默认返回继续聊天意�?
+            # 如果解析失败，默认返回继续聊天意?
             return '{"function_call": {"name": "continue_chat"}}'
