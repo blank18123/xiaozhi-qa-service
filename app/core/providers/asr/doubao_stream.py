@@ -202,7 +202,7 @@ class ASRProvider(ASRProviderBase):
                                     continue
 
                                 if conn.client_listen_mode == "manual" and conn.client_voice_stop and len(audio_data) > 15:
-                                    logger.bind(tag=TAG).debug("消息结束收到停止信号，触发处?)
+                                    # fixed
                                     await self.handle_voice_stop(conn, audio_data)
                                     break
 
@@ -239,7 +239,7 @@ class ASRProvider(ASRProviderBase):
                             break
 
                 except websockets.ConnectionClosed:
-                    logger.bind(tag=TAG).info("ASR服务连接已关?)
+                    # fixed
                     self.is_processing = False
                     break
                 except Exception as e:
@@ -421,7 +421,7 @@ class ASRProvider(ASRProviderBase):
         return result, None
 
     async def close(self):
-        """资源清理方法"""
+        """docstring"""
         if self.asr_ws:
             await self.asr_ws.close()
             self.asr_ws = None

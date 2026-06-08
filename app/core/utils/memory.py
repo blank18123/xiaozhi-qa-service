@@ -8,7 +8,7 @@ logger = setup_logging()
 
 def create_instance(class_name, *args, **kwargs):
     if os.path.exists(
-        os.path.join("core", "providers", "memory", class_name, f"{class_name}.py")
+        os.path.join("app", "core", "providers", "memory", class_name, f"{class_name}.py")
     ):
         lib_name = f"core.providers.memory.{class_name}.{class_name}"
         if lib_name not in sys.modules:

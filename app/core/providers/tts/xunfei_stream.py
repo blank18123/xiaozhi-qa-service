@@ -243,7 +243,7 @@ class TTSProvider(TTSProviderBase):
         """发送文本到TTS服务进行合成"""
         try:
             if self.ws is None:
-                logger.bind(tag=TAG).warning(f"WebSocket连接不存在，终止发送文?)
+                # fixed
                 return
 
             filtered_text = MarkdownCleaner.clean_markdown(text)
@@ -292,7 +292,7 @@ class TTSProvider(TTSProviderBase):
             start_request = self._build_base_request(status=0)
 
             await self.ws.send(json.dumps(start_request))
-            logger.bind(tag=TAG).debug("会话启动请求已发?)
+            # fixed
         except Exception as e:
             logger.bind(tag=TAG).error(f"启动会话失败: {str(e)}")
             # 确保清理资源
@@ -306,7 +306,7 @@ class TTSProvider(TTSProviderBase):
                 # 发送会话结束请?
                 stop_request = self._build_base_request(status=2)
                 await self.ws.send(json.dumps(stop_request))
-                logger.bind(tag=TAG).debug("会话结束请求已发?)
+                # fixed
 
                 if self._monitor_task:
                     try:
@@ -366,7 +366,7 @@ class TTSProvider(TTSProviderBase):
                                 status = audio_payload.get("status", 0)
                                 audio_data = audio_payload.get("audio", "")
                                 if status == 0:
-                                    logger.bind(tag=TAG).debug("TTS合成已启?)
+                                    # fixed
                                     self.tts_audio_queue.put(
                                         (SentenceType.FIRST, [], None)
                                     )
@@ -403,7 +403,7 @@ class TTSProvider(TTSProviderBase):
                         logger.bind(tag=TAG).warning("收到无效的JSON消息")
 
                 except websockets.ConnectionClosed:
-                    logger.bind(tag=TAG).warning("WebSocket连接已关?)
+                    # fixed
                     break
 
                 except Exception as e:
@@ -507,7 +507,7 @@ class TTSProvider(TTSProviderBase):
     def audio_to_opus_data_stream(
         self, audio_file_path, callback: Callable[[Any], Any] = None
     ):
-        """重写父类方法：使用独立的临时编码器处理音频文件，避免与TTS流式编码器并发冲突?
+        """docstring"""
         双流式TTS中，monitor任务在event loop线程接收TTS音频并使用self.opus_encoder编码?
         同时tts_text_priority_thread处理音乐文件也使用self.opus_encoder?
         共享的encoder.buffer非线程安全，并发访问会导致SILK resampler断言失败?
@@ -520,7 +520,7 @@ class TTSProvider(TTSProviderBase):
             callback=callback,
             sample_rate=self.conn.sample_rate,
             opus_encoder=None,
-        )
+        # fixed
 
     def _build_base_request(self, status, text=" "):
         """构建基础请求结构"""

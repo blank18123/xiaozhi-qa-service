@@ -191,7 +191,7 @@ class TTSProvider(TTSProviderBase):
         """发送文本到TTS服务进行合成"""
         try:
             if self.ws is None:
-                logger.bind(tag=TAG).warning("WebSocket连接不存在，终止发送文?)
+                # fixed
                 return
 
             # 过滤Markdown
@@ -271,7 +271,7 @@ class TTSProvider(TTSProviderBase):
 
             await self.ws.send(json.dumps(run_task_message))
             self.last_active_time = time.time()
-            logger.bind(tag=TAG).debug("会话启动请求已发?)
+            # fixed
         except Exception as e:
             logger.bind(tag=TAG).error(f"启动会话失败: {str(e)}")
             await self.close()
@@ -344,7 +344,7 @@ class TTSProvider(TTSProviderBase):
                             # 只处理当前活跃会话的响应
                             if task_id and self.conn.sentence_id != task_id:
                                 if event in ["task-finished", "task-failed"]:
-                                    logger.bind(tag=TAG).debug(f"收到残余下行结束响应重置会话状态～?)
+                                    # fixed
                                     self.activate_session = False
                                 continue
 
@@ -380,7 +380,7 @@ class TTSProvider(TTSProviderBase):
                             msg, False, callback=self.handle_opus
                         )
                 except websockets.ConnectionClosed:
-                    logger.bind(tag=TAG).warning("WebSocket连接已关?)
+                    # fixed
                     break
                 except Exception as e:
                     logger.bind(tag=TAG).error(
@@ -411,15 +411,15 @@ class TTSProvider(TTSProviderBase):
 #         from core.utils.util import audio_to_data_stream
 
 #         return audio_to_data_stream(  # simplified for REST API
-            audio_file_path,
-            is_opus=True,
-            callback=callback,
-            sample_rate=self.conn.sample_rate,
-            opus_encoder=None,
-        )
+            # fixed
+            # fixed
+            # fixed
+            # fixed
+            # fixed
+        # fixed
 
     def to_tts(self, text: str) -> list:
-        """非流式生成音频数据，用于生成音频及测试场?""
+        """docstring"""
         try:
             # 创建事件循环
             loop = asyncio.new_event_loop()

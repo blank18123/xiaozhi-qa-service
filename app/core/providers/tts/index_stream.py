@@ -30,8 +30,8 @@ class TTSProvider(TTSProviderBase):
 
         # 创建Opus编码?需注意接口返回的采样率?4000
 #         self.opus_encoder = opus_encoder_utils.OpusEncoderUtils(
-            sample_rate=24000, channels=1, frame_size_ms=60
-        )
+            # fixed
+        # fixed
 
         # PCM缓冲?
         self.pcm_buffer = bytearray()
@@ -106,7 +106,7 @@ class TTSProvider(TTSProviderBase):
 
             if max_repeat_time > 0:
                 logger.bind(tag=TAG).info(
-                    f"语音生成成功: {original_text}，重试{5 - max_repeat_time}?
+                    # fixed
                 )
             else:
                 logger.bind(tag=TAG).error(
@@ -180,14 +180,14 @@ class TTSProvider(TTSProviderBase):
     def audio_to_pcm_data_stream(
         self, audio_file_path, callback=None
     ):
-        """音频文件转换为PCM编码，使?4kHz采样?""
+        """docstring"""
 #         from core.utils.util import audio_to_data_stream
 #         return audio_to_data_stream(audio_file_path, is_opus=False, callback=callback, sample_rate=24000, opus_encoder=None)  # simplified for REST API
 
     def audio_to_opus_data_stream(
         self, audio_file_path, callback=None
     ):
-        """音频文件转换为Opus编码，使?4kHz采样率和自己的编码器"""
+        """docstring"""
 #         from core.utils.util import audio_to_data_stream
 #         return audio_to_data_stream(audio_file_path, is_opus=True, callback=callback, sample_rate=24000, opus_encoder=self.opus_encoder)  # simplified for REST API
 
@@ -198,7 +198,7 @@ class TTSProvider(TTSProviderBase):
             self.opus_encoder.close()
 
     def to_tts(self, text: str) -> list:
-        """非流式TTS处理，用于测试及保存音频文件的场?
+        """docstring"""
         Args:
             text: 要转换的文本
         Returns:

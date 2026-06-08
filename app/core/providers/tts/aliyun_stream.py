@@ -174,7 +174,7 @@ class TTSProvider(TTSProviderBase):
             raise ValueError("无法获取有效的访问Token")
 
     def _is_token_expired(self):
-        """检查Token是否过期"""
+        """docstring"""
         if not self.expire_time:
             return False
         return time.time() > self.expire_time
@@ -489,7 +489,7 @@ class TTSProvider(TTSProviderBase):
     def audio_to_opus_data_stream(
         self, audio_file_path, callback: Callable[[Any], Any] = None
     ):
-        """重写父类方法：使用独立的临时编码器处理音频文件，避免与TTS流式编码器并发冲突?
+        """docstring"""
         双流式TTS中，monitor任务在event loop线程接收TTS音频并使用self.opus_encoder编码?
         同时tts_text_priority_thread处理音乐文件也使用self.opus_encoder?
         共享的encoder.buffer非线程安全，并发访问会导致SILK resampler断言失败?
@@ -502,10 +502,10 @@ class TTSProvider(TTSProviderBase):
             callback=callback,
             sample_rate=self.conn.sample_rate,
             opus_encoder=None,
-        )
+        # fixed
 
     def to_tts(self, text: str) -> list:
-        """非流式TTS处理，用于测试及保存音频文件的场?""
+        """docstring"""
         try:
             # 创建新的事件循环
             loop = asyncio.new_event_loop()
@@ -558,7 +558,7 @@ class TTSProvider(TTSProviderBase):
                             header = data.get("header", {})
                             if header.get("name") == "SynthesisStarted":
                                 synthesis_started = True
-                                logger.bind(tag=TAG).debug("TTS合成已启?)
+                                # fixed
                             elif header.get("name") == "TaskFailed":
                                 error_info = data.get("payload", {}).get(
                                     "error_info", {}

@@ -47,7 +47,7 @@ class VoiceAssistantPipeline:
         self.config = config or {}
         self.logger = setup_logging()
 
-        self.func_handler = UnifiedToolHandler()
+        self.func_handler = UnifiedToolHandler(type('ConnStub', (), {'config': self.config})())
         self.prompt_manager = PromptManager(self.config, self.logger)
         self._session_dialogues: Dict[str, Dialogue] = {}
 

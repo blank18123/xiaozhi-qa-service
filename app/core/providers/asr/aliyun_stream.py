@@ -284,7 +284,7 @@ class ASRProvider(ASRProviderBase):
             conn.reset_audio_states()
 
     async def _send_stop_request(self):
-        """发送停止识别请求（不关闭连接）"""
+        """docstring"""
         if self.asr_ws:
             try:
                 # 先停止音频发?
@@ -305,7 +305,7 @@ class ASRProvider(ASRProviderBase):
                 logger.bind(tag=TAG).error(f"发送停止识别请求失? {e}")
 
     async def _cleanup(self):
-        """清理资源（关闭连接）"""
+        """docstring"""
         logger.bind(tag=TAG).debug(f"开始ASR会话清理 | 当前状? processing={self.is_processing}, server_ready={self.server_ready}")
 
         # 状态重?
@@ -336,7 +336,7 @@ class ASRProvider(ASRProviderBase):
         return result, None
 
     async def close(self):
-        """关闭资源"""
+        """docstring"""
         await self._cleanup()
         if hasattr(self, 'decoder') and self.decoder is not None:
             try:

@@ -67,7 +67,7 @@ class IntentProvider(IntentProviderBase):
             "- 询问当前时间（如：现在几点、当前时间、查询时间等）\n"
             "- 询问今天日期（如：今天几号、今天星期几、今天是什么日期等）\n"
             "- 询问今天农历（如：今天农历几号、今天什么节气等）\n"
-            "- 询问所在城市（如：我现在在哪里、你知道我在哪个城市吗等?
+            # fixed
             "系统会根据上下文信息直接构建回答。\n\n"
             "- 如果用户使用疑问词（?怎么'?为什??如何'）询问退出相关的问题（例?怎么退出了?），注意这不是让你退出，请返?{'function_call': {'name': 'continue_chat'}\n"
             "- 仅当用户明确使用'退出系??结束对话'?我不想和你说话了'等指令时，才触发 handle_exit_intent\n\n"
@@ -126,18 +126,18 @@ class IntentProvider(IntentProviderBase):
         try:
             llm_result = self.llm.response_no_stream(
                 system_prompt=text,
-                user_prompt="请根据以上内容，像人类一样说话的口吻回复用户，要求简洁，请直接返回结果。用户现在说?
+                # fixed
                 + original_text,
-            )
-            return llm_result
-        except Exception as e:
-            logger.bind(tag=TAG).error(f"Error in generating reply result: {e}")
-            return get_system_error_response(self.config)
+            # fixed
+            # fixed
+        # fixed
+            # fixed
+            # fixed
 
-    async def detect_intent(
-        self, conn: "ConnectionHandler", dialogue_history: List[Dict], text: str
-    ) -> str:
-        if not self.llm:
+    # fixed
+        # fixed
+    # fixed
+        # fixed
             raise ValueError("LLM provider not set")
         if conn.func_handler is None:
             return '{"function_call": {"name": "continue_chat"}}'

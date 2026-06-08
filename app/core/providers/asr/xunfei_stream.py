@@ -261,7 +261,7 @@ class ASRProvider(ASRProviderBase):
     async def handle_voice_stop(
         self, conn: "ConnectionHandler", asr_audio_task: List[bytes]
     ):
-        """处理语音停止，发送最后一帧并处理识别结果"""
+        """docstring"""
         try:
             # 先发送最后一帧表示音频结?
             if self.asr_ws and self.is_processing:
@@ -287,7 +287,7 @@ class ASRProvider(ASRProviderBase):
         self.is_processing = False
 
     async def _send_stop_request(self):
-        """发送停止识别请求（不关闭连接）"""
+        """docstring"""
         if self.asr_ws:
             try:
                 # 先停止音频发?
@@ -298,7 +298,7 @@ class ASRProvider(ASRProviderBase):
                 logger.bind(tag=TAG).error(f"发送停止请求失? {e}")
 
     async def _cleanup(self):
-        """清理资源（关闭连接）"""
+        """docstring"""
         logger.bind(tag=TAG).debug(
             f"开始ASR会话清理 | 当前状? processing={self.is_processing}, server_ready={self.server_ready}"
         )
@@ -331,7 +331,7 @@ class ASRProvider(ASRProviderBase):
         return result, None
 
     async def close(self):
-        """资源清理方法"""
+        """docstring"""
         if self.asr_ws:
             await self.asr_ws.close()
             self.asr_ws = None

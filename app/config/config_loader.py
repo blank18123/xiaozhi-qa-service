@@ -1,6 +1,12 @@
 ﻿import os
+import sys
 import yaml
 from collections.abc import Mapping
+
+# Ensure app/ is in sys.path so legacy imports (core.utils.* etc.) resolve
+_app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _app_dir not in sys.path:
+    sys.path.insert(0, _app_dir)
 
 
 def get_project_dir():

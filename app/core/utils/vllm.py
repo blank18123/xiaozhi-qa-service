@@ -14,7 +14,7 @@ logger = setup_logging()
 
 def create_instance(class_name, *args, **kwargs):
     # 创建LLM实例
-    if os.path.exists(os.path.join("core", "providers", "vllm", f"{class_name}.py")):
+    if os.path.exists(os.path.join("app", "core", "providers", "vllm", f"{class_name}.py")):
         lib_name = f"core.providers.vllm.{class_name}"
         if lib_name not in sys.modules:
             sys.modules[lib_name] = importlib.import_module(f"{lib_name}")
