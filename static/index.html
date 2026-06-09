@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XiaoZhi QA Service</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f0f14;color:#e0e0e0;height:100vh;overflow:hidden}
+#app{display:grid;grid-template-columns:260px 1fr;grid-template-rows:48px 1fr auto;height:100vh}
+#topbar{grid-column:1/-1;background:#1a1a24;border-bottom:1px solid #2a2a3a;display:flex;align-items:center;padding:0 20px;gap:12px}
+#topbar h2{font-size:16px;font-weight:600;color:#fff}
+#status{width:8px;height:8px;border-radius:50%;background:#4ade80}
+#status.off{background:#ef4444}
+#status.streaming{background:#f59e0b}
+#status-text{font-size:12px;color:#888}
+#sidebar{background:#15151f;border-right:1px solid #2a2a3a;display:flex;flex-direction:column;overflow:hidden}
+#sidebar-header{padding:16px;border-bottom:1px solid #2a2a3a}
+#sidebar-header button{width:100%;padding:8px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+#sidebar-header button:hover{background:#1d4ed8}
+#session-list{flex:1;overflow-y:auto;padding:8px}
+.session-item{padding:10px 12px;border-radius:6px;cursor:pointer;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.session-item:hover{background:#2a2a3a}
+.session-item.active{background:#1e3a5f}
+.session-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-item .count{font-size:11px;color:#666;margin-left:8px}
+.session-item .del{color:#666;cursor:pointer;padding:2px 6px;border-radius:3px;display:none}
+.session-item:hover .del{display:block}
+.session-item .del:hover{color:#ef4444;background:#3a1a1a}
+#chat-area{display:flex;flex-direction:column;overflow:hidden;background:#0f0f14}
+#messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.msg{display:flex;gap:10px;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg .avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.msg.user .avatar{background:#2563eb}
+.msg.assistant .avatar{background:#7c3aed}
+.msg .bubble{max-width:75%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.6;word-break:break-word}
+.msg.user{flex-direction:row-reverse}
+.msg.user .bubble{background:#2563eb;color:#fff;border-bottom-right-radius:4px}
+.msg.assistant .bubble{background:#1e1e2e;border:1px solid #2a2a3a;border-bottom-left-radius:4px}
+.msg .bubble p{margin:4px 0}
+.msg .bubble pre{background:#0f0f14;border:1px solid #333;border-radius:6px;padding:10px;overflow-x:auto;font-size:12px;margin:8px 0}
+.msg .bubble code{font-size:12px;background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px}
+.msg .bubble pre code{background:none;padding:0}
+.tool-call{background:#1a1a2e;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px}
+.tool-call .header{color:#f59e0b;font-weight:600;margin-bottom:4px}
+.tool-call .args{color:#999;font-family:monospace;max-height:80px;overflow-y:auto;white-space:pre-wrap}
+#input-area{border-top:1px solid #2a2a3a;background:#1a1a24;padding:12px 20px}
+#mode-bar{display:flex;gap:8px;margin-bottom:8px;font-size:12px;color:#888}
+#mode-bar label{cursor:pointer;padding:4px 10px;border-radius:4px;border:1px solid #333}
+#mode-bar label.active{background:#2563eb;border-color:#2563eb;color:#fff}
+#mode-bar input[type=radio]{display:none}
+#session-info{font-size:11px;color:#555;margin-left:auto}
+#input-row{display:flex;gap:8px}
+#text-input{flex:1;padding:10px 14px;border:1px solid #333;border-radius:8px;background:#0f0f14;color:#e0e0e0;font-size:14px;resize:none;outline:none;font-family:inherit}
+#text-input:focus{border-color:#2563eb}
+#text-input:disabled{opacity:.5}
+#send-btn{padding:10px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;white-space:nowrap;font-weight:500}
+#send-btn:hover{background:#1d4ed8}
+#send-btn:disabled{background:#333;color:#666;cursor:not-allowed}
+#audio-upload{display:none;border:2px dashed #333;border-radius:8px;padding:20px;text-align:center;margin-bottom:8px;cursor:pointer}
+#audio-upload.drag{border-color:#2563eb;background:rgba(37,99,235,.1)}
+#audio-upload.uploading{border-color:#f59e0b}
+#audio-file{display:none}
+.loading{display:inline-block;width:6px;height:6px;border-radius:50%;background:#7c3aed;animation:bounce 1.4s infinite;margin-left:4px}
+.loading:nth-child(2){animation-delay:.2s}
+.loading:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.empty-state{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#444;gap:12px}
+.empty-state .icon{font-size:48px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+#audio-player{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar"><h2>XiaoZhi QA</h2><div id="status" class="off"></div><span id="status-text"></span></div>
+  <div id="sidebar"><div id="sidebar-header"><button onclick="newSession()">+ 新会话</button></div><div id="session-list"></div></div>
+  <div id="chat-area"><div id="messages"><div class="empty-state"><span class="icon">🤖</span><p>开始一段对话吧</p></div></div>
+    <div id="input-area">
+      <div id="mode-bar">
+        <label class="active"><input type="radio" name="mode" value="text" checked onchange="switchMode('text')"> 文本</label>
+        <label><input type="radio" name="mode" value="audio" onchange="switchMode('audio')"> 语音</label>
+        <span id="session-info"></span>
+      </div>
+      <div id="audio-upload" onclick="document.getElementById('audio-file').click()"><p> 点击上传或拖拽 WAV/MP3 文件</p><input type="file" id="audio-file" accept="audio/wav,audio/mpeg,audio/mp3" onchange="handleAudioFile(this)"></div>
+      <div id="input-row"><textarea id="text-input" rows="2" placeholder="输入问题... (Enter 发送)" onkeydown="handleKey(event)"></textarea><button id="send-btn" onclick="sendMessage()">发送</button></div>
+    </div>
+  </div>
+</div>
+<audio id="audio-player" controls></audio>
+<script>
+var API='http://localhost:8011/api/v1';
+var currentSession=null;
+var streaming=false;
+var assistantBubble=null;
+var assistantContent='';
+
+function loadSessions(){try{return JSON.parse(localStorage.getItem('xzsessions')||'[]')}catch(e){return[]}}
+function saveSessions(ss){localStorage.setItem('xzsessions',JSON.stringify(ss))}
+function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function setStatus(s){var d=document.getElementById('status');var t=document.getElementById('status-text');d.className=s==='streaming'?'streaming':(s==='on'?'':'off');t.textContent=s==='streaming'?'...':''}
+
+function newSession(){var id=crypto.randomUUID();var name='New '+new Date().toLocaleTimeString();var ss=loadSessions();ss.unshift({id:id,name:name,count:0});saveSessions(ss);switchTo(id);renderSessions()}
+
+function switchTo(id){currentSession=id;var ss=loadSessions();var s=ss.find(function(x){return x.id===id});if(s)document.getElementById('session-info').textContent=s.name;loadMessages(id);renderSessions()}
+
+function deleteSession(id,e){e.stopPropagation();var ss=loadSessions().filter(function(x){return x.id!==id});saveSessions(ss);localStorage.removeItem('xzmsgs-'+id);if(currentSession===id){currentSession=ss.length?ss[0].id:null;if(currentSession)loadMessages(currentSession);else document.getElementById('messages').innerHTML='<div class="empty-state"><span class="icon">🤖</span><p>开始一段对话吧</p></div>'}renderSessions()}
+
+function renderSessions(){var ss=loadSessions();var el=document.getElementById('session-list');el.innerHTML=ss.map(function(s){return '<div class="session-item'+(s.id===currentSession?' active':'')+'" onclick="switchTo(\''+s.id+'\')"><span class="name">'+escHtml(s.name)+'</span><span class="count">'+s.count+'</span><span class="del">X</span></div>'}).join('');var dels=el.querySelectorAll('.del');dels.forEach(function(d,i){d.addEventListener('click',function(e){deleteSession(ss[i].id,e)})})}
+
+function updateSessionInfo(text){if(!currentSession)return;var ss=loadSessions();var s=ss.find(function(x){return x.id===currentSession});if(!s)return;s.count=(s.count||0)+1;if(s.count===1&&text)s.name=text.substring(0,20);saveSessions(ss);renderSessions()}
+
+function loadMessages(id){try{var ms=JSON.parse(localStorage.getItem('xzmsgs-'+id)||'[]');renderMessages(ms)}catch(e){renderMessages([])}}
+function saveMessages(id,ms){localStorage.setItem('xzmsgs-'+id,JSON.stringify(ms.slice(-100)))}
+function getMessages(){try{return JSON.parse(localStorage.getItem('xzmsgs-'+currentSession)||'[]')}catch(e){return[]}}
+
+function renderMessages(ms){var el=document.getElementById('messages');if(!ms.length){el.innerHTML='<div class="empty-state"><span class="icon">🤖</span><p>开始一段对话吧</p></div>';return}el.innerHTML=ms.map(function(m){if(m.role==='tool')return '<div class="tool-call"><div class="header"> Tool: '+escHtml(m.tool||'')+'</div><div class="args">'+escHtml(m.content||'')+'</div></div>';var av=m.role==='user'?'👤':'🤖';var cls=m.role==='user'?'user':'assistant';var h=marked.parse(m.content||'');return '<div class="msg '+cls+'"><div class="avatar">'+av+'</div><div class="bubble">'+h+'</div></div>'}).join('');scrollBottom()}
+
+function scrollBottom(){var el=document.getElementById('messages');setTimeout(function(){el.scrollTop=el.scrollHeight},50)}
+
+function switchMode(mode){var ls=document.querySelectorAll('#mode-bar label');ls.forEach(function(l){l.classList.remove('active')});document.querySelector('#mode-bar input[value="'+mode+'"]').parentElement.classList.add('active');document.getElementById('audio-upload').style.display=mode==='audio'?'block':'none';document.getElementById('input-row').style.display=mode==='audio'?'none':'flex'}
+
+function sendMessage(){if(streaming)return;var inp=document.getElementById('text-input');var q=inp.value.trim();if(!q)return;if(!currentSession)newSession();inp.value='';inp.disabled=true;document.getElementById('send-btn').disabled=true;var ms=getMessages();ms.push({role:'user',content:q});saveMessages(currentSession,ms);updateSessionInfo(q);renderMessages(ms);scrollBottom();assistantBubble=document.createElement('div');assistantBubble.className='msg assistant';assistantBubble.innerHTML='<div class="avatar">🤖</div><div class="bubble"><span class="loading"></span><span class="loading"></span><span class="loading"></span></div>';document.getElementById('messages').appendChild(assistantBubble);assistantContent='';scrollBottom();setStatus('streaming');streaming=true;fetch(API+'/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,mode:'text',session_id:currentSession})}).then(function(resp){var reader=resp.body.getReader();var decoder=new TextDecoder();var buf='';function pump(){reader.read().then(function(r){if(r.done){finishAssistant();return}buf+=decoder.decode(r.value,{stream:true});var lines=buf.split('\n');buf=lines.pop()||'';lines.forEach(function(line){if(!line.startsWith('data: '))return;try{var ev=JSON.parse(line.slice(6))}catch(e){return}if(ev.event==='token'){assistantContent+=ev.data;updateBubble()}else if(ev.event==='tool_call'){var tc=document.createElement('div');tc.className='tool-call';tc.innerHTML='<div class="header">Tool: '+escHtml(ev.tool_name||'')+'</div><div class="args">'+escHtml(ev.data||'')+'</div>';document.getElementById('messages').appendChild(tc)}else if(ev.event==='error'){assistantContent+=' Error: '+ev.data;updateBubble()}});pump()}).catch(function(e){assistantContent+=' Error: '+e.message;finishAssistant()})}pump()}).catch(function(e){assistantContent+=' Network: '+e.message;finishAssistant()})}
+
+function updateBubble(){var b=assistantBubble?assistantBubble.querySelector('.bubble'):null;if(b)b.innerHTML=marked.parse(assistantContent);scrollBottom()}
+
+function finishAssistant(){if(assistantContent){var ms=getMessages();ms.push({role:'assistant',content:assistantContent});saveMessages(currentSession,ms)}else if(assistantBubble)assistantBubble.remove();assistantBubble=null;assistantContent='';streaming=false;setStatus('on');document.getElementById('text-input').disabled=false;document.getElementById('send-btn').disabled=false;document.getElementById('text-input').focus()}
+
+function handleAudioFile(inp){var file=inp.files[0];if(!file)return;if(!currentSession)newSession();var fd=new FormData();fd.append('file',file);fd.append('session_id',currentSession);var el=document.getElementById('audio-upload');el.classList.add('uploading');el.innerHTML='<p> ...</p>';fetch(API+'/ask/audio',{method:'POST',body:fd}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t)});return r.blob()}).then(function(blob){var url=URL.createObjectURL(blob);var a=document.getElementById('audio-player');a.src=url;a.style.display='block';a.play();el.innerHTML='<p> OK</p>';setTimeout(function(){el.innerHTML='<p> 点击上传或拖拽 WAV/MP3</p>';el.classList.remove('uploading')},3000)}).catch(function(e){el.innerHTML='<p> Err: '+escHtml(e.message)+'</p>';el.classList.remove('uploading');setTimeout(function(){el.innerHTML='<p> 点击上传或拖拽 WAV/MP3</p>'},3000)});inp.value=''}
+
+var dz=document.getElementById('audio-upload');dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag')});dz.addEventListener('dragleave',function(){dz.classList.remove('drag')});dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');var f=e.dataTransfer.files[0];if(f){var inp=document.getElementById('audio-file');var dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleAudioFile(inp)}})
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}}
+
+var ss=loadSessions();if(ss.length)switchTo(ss[0].id);renderSessions();setStatus('on')
+</script>
+</body>
+</html>

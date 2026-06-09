@@ -18,3 +18,14 @@
 2026-06-08 14:55:44 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - ASR: FunASR
 2026-06-08 14:55:44 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - Memory: nomem
 2026-06-08 14:55:44 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - Intent: nointent
+2026-06-08 14:56:17 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - TTS: EdgeTTS
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - LLM: DeepSeekLLM
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - ASR: FunASR
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - Memory: nomem
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.modules_initialize - INFO - app.core.utils.modules_initialize - Intent: nointent
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.prompt_manager - WARNING - app.core.utils.prompt_manager - 未找到agent-base-prompt.txt文件
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.api.routes - INFO - app.api.routes - Pipeline initialized
+2026-06-08 14:56:18 - 0.9.3_00000000000000 - app.core.utils.prompt_manager - INFO - app.core.utils.prompt_manager - 使用快速提示词: ...
+2026-06-08 14:56:37 - 0.9.3_00000000000000 - app.core.utils.prompt_manager - INFO - app.core.utils.prompt_manager - 使用快速提示词: ...
+2026-06-08 14:59:43 - 0.9.3_00000000000000 - app.core.utils.prompt_manager - INFO - app.core.utils.prompt_manager - 使用快速提示词: ...
+2026-06-08 15:24:52 - 0.9.3_00000000000000 - core.providers.asr.base - ERROR - core.providers.asr.base - 文件操作错误: [WinError 1225] 远程计算机拒绝网络连接。
