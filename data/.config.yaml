@@ -1,7 +1,7 @@
 ﻿selected_module:
   TTS: EdgeTTS
   LLM: DeepSeekLLM
-  ASR: FunASR
+  ASR: VoskASR
   Memory: nomem
   Intent: nointent
 
@@ -12,12 +12,13 @@ LLM:
     url: https://api.deepseek.com
     model_name: "deepseek-chat"
     max_tokens: 4096
-    temperature: 0.7
+    temperature: 0.3
 
 TTS:
   EdgeTTS:
     type: edge
 
 ASR:
-  FunASR:
-    type: fun_server
+  VoskASR:
+    type: vosk
+    model_path: data/vosk-model-small-cn-0.22
