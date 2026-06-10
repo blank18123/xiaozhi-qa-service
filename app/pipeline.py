@@ -54,7 +54,7 @@ class VoiceAssistantPipeline:
     def _get_dialogue(self, session_id: str) -> Dialogue:
         if session_id not in self._session_dialogues:
             dialogue = Dialogue()
-            system_prompt = self.prompt_manager.get_quick_prompt("")
+            system_prompt = "你是小智，一个友好的中文语音助手。用口语化中文回答，每次2-3句。记住对话中用户告诉你的信息。"
             dialogue.put(Message(role="system", content=system_prompt))
             self._session_dialogues[session_id] = dialogue
         return self._session_dialogues[session_id]
